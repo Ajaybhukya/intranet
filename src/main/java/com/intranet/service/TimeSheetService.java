@@ -30,9 +30,9 @@
 //     List<TimeSheet> sheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
 //     List<TimeSheetHistoryDTO> history = new ArrayList<>();
 
-//     for (TimeSheet sheet : sheets) {
-//         List<TimeSheetEntry> entries = entryRepository.findByTimesheetId(sheet.getTimesheetId());
-//         List<TimeSheetApproval> approvals = approvalRepository.findByTimesheetId(sheet.getTimesheetId());
+    for (TimeSheet sheet : sheets) {
+        List<TimeSheetEntry> entries = entryRepository.findByTimesheetId(sheet.getId());
+        List<TimeSheetApproval> approvals = approvalRepository.findByTimesheetId(sheet.getId());
 
 //         TimeSheetHistoryDTO dto = new TimeSheetHistoryDTO();
 //         dto.setWorkDate(sheet.getWorkDate());
