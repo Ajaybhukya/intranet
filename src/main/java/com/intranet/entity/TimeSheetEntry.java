@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -28,17 +30,14 @@ public class TimeSheetEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long timeSheetEntryId;
 
-    // @ManyToOne
-    // @JoinColumn(name = "timesheet_id")
-    // private TimeSheet timesheet; // FK from TimeSheet Enity
+    @ManyToOne
+    @JoinColumn(name = "timesheet_id")
     private Long timesheetId;
-    // @ManyToOne
-    // @JoinColumn(name = "project_id")
-    // private Project project;
 
-    // @ManyToOne
-    // @JoinColumn(name = "task_id")
-    // private Task task;
+    
+    // private Project project; // FK from project management system via API
+
+    // private Task task; // FK from project management system via API
 
     private Long taskId;
     private Long projectId;
