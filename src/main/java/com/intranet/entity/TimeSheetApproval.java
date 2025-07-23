@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -19,9 +20,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "time_sheet_approval", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"timesheetId", "approversId"})
-})
+@Table(name = "TimeSheetApproval", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"timesheetId", "userApproverMapId"}))
 public class TimeSheetApproval {
 
     @Id
@@ -29,24 +29,19 @@ public class TimeSheetApproval {
     private Long timeSheetApprovalId;
 
     @ManyToOne
-    @JoinColumn(name = "timesheet_id", unique = true)
+    @JoinColumn(name = "timesheetId")
     private TimeSheet timesheet;
 
-    private Long timesheetId;
-
     @ManyToOne
-    @JoinColumn(name = "approvers_id")
-    private Approver approver;
-
-    private Long approverId;
+    @JoinColumn(name = "userApproverMapId")
+    private UserApproverMap approver;
 
     @Column(nullable = false)
     private String approvalStatus = "Pending";
 
     private String description;
 
-    @CreationTimestamp
-    private LocalDateTime approvalTime;
+    @Column(nullable = false)
+    private LocalDateTime approvalTime = LocalDateTime.now();
 
-    // Getters, setters
 }

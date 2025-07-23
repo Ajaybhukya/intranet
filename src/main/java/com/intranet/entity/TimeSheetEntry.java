@@ -2,6 +2,7 @@ package com.intranet.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -21,35 +23,29 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "time_sheet_entry", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"timesheetId", "taskId", "projectId"})
-})
+@Table(name = "time_sheet_entry", 
+       uniqueConstraints = @UniqueConstraint(columnNames = {"timesheetId", "taskId", "projectId"}))
 public class TimeSheetEntry {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long timeSheetEntryId;
+    private Long timesheetEntryId;
 
-    @ManyToOne
-    @JoinColumn(name = "timesheet_id")
-    private Long timesheetId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "timesheetId")
+    private TimeSheet timesheet;
 
-    
-    // private Project project; // FK from project management system via API
+    private Long projectId; // external Project reference
+    private Long taskId;    // external tasks reference
 
-    // private Task task; // FK from project management system via API
-
-    private Long taskId;
-    private Long projectId;
-
-    @Column(columnDefinition = "VARCHAR(255)")
     private String description;
 
-    @Column(columnDefinition = "VARCHAR(255)", nullable = false)
+    @Column(nullable = false)
     private String workType = "WFO";
 
-    @Column(precision = 5, scale = 2)
-    private BigDecimal hoursWorked;
+    private LocalDateTime fromTime;
+
+    private LocalDateTime toTime;
 
     private String otherDescription;
 }

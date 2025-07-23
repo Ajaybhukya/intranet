@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.intranet.entity.TimeSheetEntry;
 
 public interface TimeSheetEntryRepo  extends JpaRepository<TimeSheetEntry, Long> {
-    List<TimeSheetEntry> findByTimesheetId(Long timesheetId);
+
+    // List<TimeSheetEntry> findByTimesheetId(Long timesheetId);
 
 }
