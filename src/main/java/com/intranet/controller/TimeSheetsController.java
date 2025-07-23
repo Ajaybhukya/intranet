@@ -1,4 +1,4 @@
-// package com.intranet.controller;
+package com.intranet.controller;
 
 import java.util.List;
 
@@ -11,16 +11,16 @@ import com.intranet.dto.external.UserDTO;
 import com.intranet.service.TimeSheetService;
 
 
-// public class TimeSheetsController {
+public class TimeSheetsController {
 
-//     @Autowired
-//     private TimeSheetService timesheetService;
+    @Autowired
+    private TimeSheetService timesheetService;
 
-//     @GetMapping("/timesheet/history")
-//     public ResponseEntity<List<TimeSheetHistoryDTO>> getMyTimesheetHistory(
-//         @AuthenticationPrincipal UserDTO user) {
-//         List<TimeSheetHistoryDTO> history = timesheetService.getTimesheetHistoryForUser((user).getId());
-//         return ResponseEntity.ok(history);
-//     }
+    @GetMapping("/timesheet/history")
+    public ResponseEntity<List<TimeSheetHistoryDTO>> getMyTimesheetHistory(
+        @AuthenticationPrincipal UserDTO user) {
+        List<TimeSheetHistoryDTO> history = timesheetService.getTimesheetHistoryForUser((user).getId());
+        return ResponseEntity.ok(history);
+    }
 
-// }
+}
