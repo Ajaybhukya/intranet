@@ -8,6 +8,7 @@ import com.intranet.entity.TimeSheetEntry;
 
 public interface TimeSheetEntryRepo  extends JpaRepository<TimeSheetEntry, Long> {
 
+
     // List<TimeSheetEntry> findByTimesheetId(Long timesheetId);
 
 }
