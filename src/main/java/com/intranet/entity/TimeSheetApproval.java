@@ -43,5 +43,4 @@ public class TimeSheetApproval {
 
     @Column(nullable = false)
     private LocalDateTime approvalTime = LocalDateTime.now();
-
 }
