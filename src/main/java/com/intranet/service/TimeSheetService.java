@@ -92,4 +92,38 @@ public class TimeSheetService {
 
         return entryRepository.save(entry);
     }
+
+    // method to edit/update a timesheet entry
+    public TimeSheetEntry editTimesheetEntry(Long userId, Long entryId, TimeSheetEntryDTO entryDto) {
+        TimeSheetEntry entry = entryRepository.findById(entryId)
+                .orElseThrow(() -> new RuntimeException("Entry not found"));
+
+        // Ensure the user is authorized to edit this entry
+        if (!entry.getTimesheet().getUserId().equals(userId)) {
+            throw new RuntimeException("Unauthorized to edit this entry");
+        }
+
+        // Check if the entry status is PENDING
+        if (!entry.getStatus().equals("PENDING")) {
+            throw new RuntimeException("Entry can only be edited if status is PENDING");
+        }
+
+        // Update fields
+        entry.setProjectId(entryDto.getProjectId());
+        entry.setTaskId(entryDto.getTaskId());
+        entry.setDescription(entryDto.getDescription());
+        entry.setWorkType(entryDto.getWorkType());
+
+        // Recalculate hoursWorked if fromTime and toTime are provided
+        if (entry.getFromTime() != null && entry.getToTime() != null) {
+            long hours = Duration.between(entry.getFromTime(), entry.getToTime()).toHours();
+            entry.setHoursWorked(BigDecimal.valueOf(hours));
+        } else {
+            entry.setHoursWorked(entryDto.getHoursWorked());
+        }
+
+        return entryRepository.save(entry);
+    }
+    
+
 }

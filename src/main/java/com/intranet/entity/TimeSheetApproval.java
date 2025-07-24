@@ -37,7 +37,7 @@ public class TimeSheetApproval {
     private UserApproverMap approver;
 
     @Column(nullable = false)
-    private String approvalStatus = "Pending";
+    private String approvalStatus = "PENDING";
 
     private String description;
 

@@ -49,4 +49,14 @@ public class TimeSheetEntry {
     private BigDecimal hoursWorked; // New field for calculated hours
 
     private String otherDescription;
+
+    public String getStatus() {
+        
+        if (timesheet != null) {
+            return timesheet.getStatus();
+        }else{
+            // no timesheet associated
+            return "PENDING";
+        }
+    }
 }

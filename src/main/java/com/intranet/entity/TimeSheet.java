@@ -46,4 +46,9 @@ public class TimeSheet {
 
     @OneToMany(mappedBy = "timesheet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSheetEntry> entries = new ArrayList<>();
+
+    public String getStatus() {
+        // combined status from time sheet approvals 
+        return "PENDING"; // Default status, can be updated based on approvals
+    }
 }
