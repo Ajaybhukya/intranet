@@ -57,4 +57,20 @@ public class TimeSheetsController {
     public ResponseEntity<List<TaskDTO>> getTasks(@PathVariable Long projectId) {
         return ResponseEntity.ok(projectClient.getTasksByProjectId(projectId));
     }
+
+    @PostMapping("/edit-entry/{entryId}")
+    public ResponseEntity<TimeSheetEntryDTO> editEntry(@AuthenticationPrincipal UserDTO user,
+                                                    @PathVariable Long entryId,
+                                                    @RequestBody TimeSheetEntryDTO entryDto) {
+        TimeSheetEntry updatedEntry = timesheetService.editTimesheetEntry(user.getId(), entryId, entryDto);
+        // return updated entry dto
+        TimeSheetEntryDTO updatedEntryDto = new TimeSheetEntryDTO();
+        updatedEntryDto.setProjectId(updatedEntry.getProjectId());
+        updatedEntryDto.setTaskId(updatedEntry.getTaskId());
+        updatedEntryDto.setDescription(updatedEntry.getDescription());
+        updatedEntryDto.setWorkType(updatedEntry.getWorkType());
+        updatedEntryDto.setHoursWorked(updatedEntry.getHoursWorked());
+        return ResponseEntity.ok(updatedEntryDto);
+        
+    }
 }
