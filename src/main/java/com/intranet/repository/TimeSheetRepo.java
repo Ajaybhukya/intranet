@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.intranet.entity.TimeSheet;
 
-public interface TimeSheetRepo  extends JpaRepository<TimeSheet, Long> {
+public interface TimeSheetRepo extends JpaRepository<TimeSheet, Long> {
 
-    // List<TimeSheet> findByUserIdOrderByWorkDateDesc(Long userId);
+    List<TimeSheet> findByUserIdOrderByWorkDateDesc(Long userId);
 }

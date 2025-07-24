@@ -17,7 +17,6 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-
 @Entity
 @Getter
 @Setter
@@ -46,6 +45,8 @@ public class TimeSheetEntry {
     private LocalDateTime fromTime;
 
     private LocalDateTime toTime;
+
+    private BigDecimal hoursWorked; // New field for calculated hours
 
     private String otherDescription;
 }

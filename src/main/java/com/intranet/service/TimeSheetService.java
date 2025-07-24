@@ -1,9 +1,13 @@
 package com.intranet.service;
 
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.intranet.dto.TimeSheetApprovalDTO;
 import com.intranet.dto.TimeSheetEntryDTO;
@@ -15,6 +19,7 @@ import com.intranet.repository.TimeSheetApprovalRepo;
 import com.intranet.repository.TimeSheetEntryRepo;
 import com.intranet.repository.TimeSheetRepo;
 
+@Service
 public class TimeSheetService {
 
     @Autowired
@@ -27,39 +32,64 @@ public class TimeSheetService {
     private TimeSheetApprovalRepo approvalRepository;
 
     public List<TimeSheetHistoryDTO> getTimesheetHistoryForUser(Long userId) {
-    List<TimeSheet> sheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
-    List<TimeSheetHistoryDTO> history = new ArrayList<>();
+        List<TimeSheet> sheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
+        List<TimeSheetHistoryDTO> history = new ArrayList<>();
 
-    for (TimeSheet sheet : sheets) {
-        List<TimeSheetEntry> entries = entryRepository.findByTimesheetId(sheet.getId());
-        List<TimeSheetApproval> approvals = approvalRepository.findByTimesheetId(sheet.getId());
+        for (TimeSheet sheet : sheets) {
+            List<TimeSheetEntry> entries = entryRepository.findByTimesheetId(sheet.getId());
+            List<TimeSheetApproval> approvals = approvalRepository.findByTimesheetId(sheet.getId());
 
-        TimeSheetHistoryDTO dto = new TimeSheetHistoryDTO();
-        dto.setWorkDate(sheet.getWorkDate());
+            TimeSheetHistoryDTO dto = new TimeSheetHistoryDTO();
+            dto.setWorkDate(sheet.getWorkDate());
 
-        dto.setEntries(entries.stream().map(entry -> {
-            TimeSheetEntryDTO eDto = new TimeSheetEntryDTO();
-            eDto.setProjectId(entry.getProjectId());
-            eDto.setTaskId(entry.getTaskId());
-            eDto.setDescription(entry.getDescription());
-            eDto.setWorkType(entry.getWorkType());
-            eDto.setHoursWorked(entry.getHoursWorked());
-            return eDto;
-        }).toList());
+            dto.setEntries(entries.stream().map(entry -> {
+                TimeSheetEntryDTO eDto = new TimeSheetEntryDTO();
+                eDto.setProjectId(entry.getProjectId());
+                eDto.setTaskId(entry.getTaskId());
+                eDto.setDescription(entry.getDescription());
+                eDto.setWorkType(entry.getWorkType());
+                eDto.setHoursWorked(entry.getHoursWorked());
+                return eDto;
+            }).toList());
 
-        dto.setApprovals(approvals.stream().map(app -> {
-            TimeSheetApprovalDTO aDto = new TimeSheetApprovalDTO();
-            aDto.setApprovalStatus(app.getApprovalStatus());
-            aDto.setApproverId(app.getApproveeId());
-            aDto.setApprovalTime(app.getApprovalTime());
-            aDto.setDescription(app.getDescription());
-            return aDto;
-        }).toList());
+            dto.setApprovals(approvals.stream().map(app -> {
+                TimeSheetApprovalDTO aDto = new TimeSheetApprovalDTO();
+                aDto.setApprovalStatus(app.getApprovalStatus());
+                aDto.setApproverId(app.getApprover().getApproverId()); // Fixed: Use approver from UserApproverMap
+                aDto.setApprovalTime(app.getApprovalTime());
+                aDto.setDescription(app.getDescription());
+                return aDto;
+            }).toList());
 
-        history.add(dto);
+            history.add(dto);
+        }
+
+        return history;
     }
 
-    return history;
-}
+    // New method for logging (saving) a timesheet entry
+    public TimeSheetEntry logTimesheetEntry(Long userId, TimeSheetEntryDTO entryDto) {
+        TimeSheet timesheet = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId).stream()
+                .findFirst().orElse(new TimeSheet()); // Get or create timesheet
+        timesheet.setUserId(userId);
+        // Set other timesheet fields as needed
+        timeSheetRepository.save(timesheet);
 
+        TimeSheetEntry entry = new TimeSheetEntry();
+        entry.setTimesheet(timesheet);
+        entry.setProjectId(entryDto.getProjectId());
+        entry.setTaskId(entryDto.getTaskId());
+        entry.setDescription(entryDto.getDescription()); // Store task description
+        entry.setWorkType(entryDto.getWorkType());
+
+        // Calculate hoursWorked if fromTime and toTime are provided
+        if (entry.getFromTime() != null && entry.getToTime() != null) {
+            long hours = Duration.between(entry.getFromTime(), entry.getToTime()).toHours();
+            entry.setHoursWorked(BigDecimal.valueOf(hours));
+        } else {
+            entry.setHoursWorked(entryDto.getHoursWorked());
+        }
+
+        return entryRepository.save(entry);
+    }
 }
