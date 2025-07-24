@@ -35,5 +35,11 @@ public class TimeSheetApprovalController {
     return service.getPendingUserManagerPairs();
     }
 
+    @GetMapping("/users-by-status")
+    public List<PendingApprovalDTO> getUserManagerPairsByStatus(
+            @RequestParam(required = false) String status) {
+        return service.getUserManagerPairsByStatus(status);
+    }
+
 
 }

@@ -36,5 +36,12 @@ List<TimeSheetApproval> findApprovalsForManager(
        "WHERE tsa.approvalStatus = 'Pending'")
     List<PendingApprovalDTO> findPendingUserAndManagerPairs();
 
+    @Query("SELECT new com.intranet.dto.PendingApprovalDTO(" +
+       "uam.userId, uam.approverId) " +
+       "FROM TimeSheetApproval tsa " +
+       "JOIN tsa.approver uam " +
+       "WHERE (:status IS NULL OR tsa.approvalStatus = :status)")
+List<PendingApprovalDTO> findUserAndManagerPairsByStatus(@Param("status") String status);
+
 
 }

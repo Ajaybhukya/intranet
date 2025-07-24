@@ -80,4 +80,10 @@ public List<PendingApprovalDTO> getPendingUserManagerPairs() {
     return repo.findPendingUserAndManagerPairs();
 }
 
+
+
+public List<PendingApprovalDTO> getUserManagerPairsByStatus(String status) {
+    return repo.findUserAndManagerPairsByStatus(status);
+}
+
 }
