@@ -8,9 +8,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class TimeSheetEntryDTO {
+@NoArgsConstructor
+public class TimeSheetEntryResponseDTO {
+
+    private Long timesheetEntryId;        // Changed from entryId
     private Long projectId;
     private Long taskId;
     private String description;

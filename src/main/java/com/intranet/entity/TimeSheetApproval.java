@@ -28,7 +28,7 @@ public class TimeSheetApproval {
 
     @ManyToOne
     @JoinColumn(name = "timesheetId")
-    private TimeSheet timesheet;
+    private TimeSheet timesheet;    
 
     @ManyToOne
     @JoinColumn(name = "userApproverMapId")

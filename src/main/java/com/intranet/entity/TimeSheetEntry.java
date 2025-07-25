@@ -39,7 +39,6 @@ public class TimeSheetEntry {
 
     private String description;
 
-    @Column(nullable = false)
     private String workType = "WFO";
 
     private LocalDateTime fromTime;

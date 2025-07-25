@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.intranet.dto.ManagerDetailedDTO;
 import com.intranet.dto.PendingApprovalDTO;
 import com.intranet.entity.TimeSheetApproval;
 
@@ -26,8 +27,7 @@ List<TimeSheetApproval> findApprovalsForManager(
 );
     List<TimeSheetApproval> findByApprover_UserId(Long managerUserId);
     List<TimeSheetApproval> findByTimesheet_Id(Long timesheetId);
-    @Query("SELECT a FROM TimeSheetApproval a WHERE a.approver.approverId = :managerId")
-    List<TimeSheetApproval> findByManagerId(@Param("managerId") Long managerId);
+
 
     @Query("SELECT new com.intranet.dto.PendingApprovalDTO(" +
        "uam.userId, uam.approverId) " +
@@ -42,6 +42,53 @@ List<TimeSheetApproval> findApprovalsForManager(
        "JOIN tsa.approver uam " +
        "WHERE (:status IS NULL OR tsa.approvalStatus = :status)")
 List<PendingApprovalDTO> findUserAndManagerPairsByStatus(@Param("status") String status);
+
+
+
+@Query("""
+    SELECT new com.intranet.dto.ManagerDetailedDTO(
+        ts.userId,
+        ts.id,
+        e.projectId,
+        e.taskId,
+        e.hoursWorked,
+        a.approvalStatus,
+        e.description,
+        ts.workDate
+    )
+    FROM TimeSheetApproval a
+    JOIN a.timesheet ts
+    JOIN ts.entries e
+    JOIN a.approver uam
+    WHERE uam.approverId = :managerId
+""")
+List<ManagerDetailedDTO> findDetailedByManagerId(@Param("managerId") Long managerId);
+
+
+@Query("SELECT a FROM TimeSheetApproval a " +
+       "WHERE a.approver.approverId = :managerId " +
+       "AND a.timesheet.workDate BETWEEN :startDate AND :endDate")
+List<TimeSheetApproval> findByManagerIdAndDateRange(
+    @Param("managerId") Long managerId,
+    @Param("startDate") LocalDate startDate,
+    @Param("endDate") LocalDate endDate
+);
+
+@Query("SELECT a FROM TimeSheetApproval a " +
+       "WHERE a.approver.approverId = :managerId " +
+       "AND a.approvalStatus = :status " +
+       "AND a.timesheet.workDate BETWEEN :startDate AND :endDate")
+List<TimeSheetApproval> findByManagerIdAndStatusAndDateRange(
+    @Param("managerId") Long managerId,
+    @Param("status") String status,
+    @Param("startDate") LocalDate startDate,
+    @Param("endDate") LocalDate endDate
+);
+
+
+@Query("SELECT a FROM TimeSheetApproval a WHERE a.approver.approverId = :managerId AND a.approvalStatus = :status")
+List<TimeSheetApproval> findByManagerIdAndStatus(@Param("managerId") Long managerId,
+                                                 @Param("status") String status);
 
 
 }
