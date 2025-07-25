@@ -15,11 +15,6 @@ public class TimeSheetApprovalController {
     @Autowired
     private TimeSheetApprovalService service;
 
-    @GetMapping("/manager/{managerId}")
-    public List<TimeSheetApprovalDTO> getByManager(@PathVariable Long managerId) {
-        return service.getApprovalsByManager(managerId);
-    }
-
     @GetMapping("/timesheet/{timesheetId}")
     public List<TimeSheetApprovalDTO> getByTimesheet(@PathVariable Long timesheetId) {
         return service.getApprovalsByTimesheetId(timesheetId);

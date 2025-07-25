@@ -2,6 +2,7 @@ package com.intranet.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.intranet.dto.UserApproverMapDTO;
@@ -28,5 +29,11 @@ public class UserApproverMapController {
     @PostMapping("/create")
     public UserApproverMapDTO create(@RequestBody UserApproverMapDTO dto) {
         return service.createMapping(dto);
+    }
+
+     @DeleteMapping("/delete/{userId}")
+    public ResponseEntity<String> deleteUserMappings(@PathVariable Long userId) {
+        service.deleteByUserId(userId);
+        return ResponseEntity.ok("Deleted all UserApproverMap records and related TimeSheetApprovals for userId: " + userId);
     }
 }

@@ -2,12 +2,14 @@ package com.intranet.service;
 
 import java.math.BigDecimal;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.intranet.dto.TeamTimeSheetDTO;
 import com.intranet.dto.TimeSheetApprovalDTO;
 import com.intranet.dto.TimeSheetEntryDTO;
 import com.intranet.dto.TimeSheetHistoryDTO;
@@ -122,8 +124,12 @@ public class TimeSheetService {
         }
 
         return entryRepository.save(entry);
+
+
     }
     
-
+     public List<TeamTimeSheetDTO> getTeamTimesheets(Long managerId, LocalDate workDate) {
+        return timeSheetRepository.findTeamTimeSheetsByManager(managerId, workDate);
+    }
 
 }

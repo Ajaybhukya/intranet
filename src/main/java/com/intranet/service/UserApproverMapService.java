@@ -56,4 +56,10 @@ public class UserApproverMapService {
     }).collect(Collectors.toList());
     }
     
+
+     public void deleteByUserId(Long userId) {
+        List<UserApproverMap> mappings = repo.findByUserId(userId);
+        repo.deleteAll(mappings);
+        // Due to CascadeType.ALL + orphanRemoval=true on timeSheetApprovals, all related TimeSheetApproval records will be deleted too.
+    }
 }
