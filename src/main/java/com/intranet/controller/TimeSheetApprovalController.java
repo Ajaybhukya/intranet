@@ -20,10 +20,10 @@ public class TimeSheetApprovalController {
         return service.getApprovalsByTimesheetId(timesheetId);
     }
 
-    @PostMapping("/create")
-    public TimeSheetApprovalDTO create(@RequestBody TimeSheetApprovalDTO dto) {
-        return service.createApproval(dto);
-    }
+    // @PostMapping("/create")
+    // public TimeSheetApprovalDTO create(@RequestBody TimeSheetApprovalDTO dto) {
+    //     return service.createApproval(dto);
+    // }
 
     @GetMapping("/pending-users")
     public List<PendingApprovalDTO> getPendingUserManagerPairs() {

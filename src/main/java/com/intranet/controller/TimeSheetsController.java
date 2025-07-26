@@ -37,8 +37,12 @@ public ResponseEntity<String> submitTimeSheet(
         workDate = LocalDate.now();
     }
 
-    timeSheetService.createTimeSheetWithEntriesAndApproval(userId, workDate, entries);
-    return ResponseEntity.ok("Timesheet submitted successfully.");
+   try {
+        timeSheetService.createTimeSheetWithEntriesAndApproval(userId, workDate, entries);
+        return ResponseEntity.ok("Timesheet submitted successfully.");
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 }
 
     @GetMapping("/history/{userId}")

@@ -39,7 +39,7 @@ public class TimeSheetEntry {
 
     private String description;
 
-    private String workType = "WFO";
+    private String workType;
 
     private LocalDateTime fromTime;
 

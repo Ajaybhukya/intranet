@@ -123,9 +123,9 @@ public void bulkUpdateApprovals(Long managerId, String status) {
 
 
 public void updateApprovalStatus(Long managerId, Long userId, Long timesheetId, String status) {
-    if (!status.equals("APPROVED") && !status.equals("REJECTED")) {
-        throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
-    }
+    // if (!status.equals("APPROVED") && !status.equals("REJECTED")) {
+    //     throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
+    // }
 
     TimeSheetApproval approval = repo
         .findByTimesheetIdAndApprover_UserIdAndApprover_ApproverId(timesheetId, userId, managerId)

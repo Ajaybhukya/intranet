@@ -40,14 +40,19 @@ public class TimeSheetService {
 
 
      public void createTimeSheetWithEntriesAndApproval(Long userId, LocalDate workDate, List<TimeSheetEntryDTO> entriesDto) {
-        // Step 1: Create or get existing TimeSheet
-        TimeSheet timesheet = timeSheetRepository.findByUserIdAndWorkDate(userId, workDate)
-                .orElseGet(() -> {
-                    TimeSheet ts = new TimeSheet();
-                    ts.setUserId(userId);
-                    ts.setWorkDate(workDate);
-                    return timeSheetRepository.save(ts);
-                });
+
+     // ✅ Step 0: Check if user is assigned to any manager
+    List<UserApproverMap> approver = userApproverMapRepo.findByUserId(userId);
+    if (approver == null || approver.isEmpty()) {
+        throw new IllegalArgumentException("User is not assigned to any manager. Cannot submit timesheet.");
+    }        
+
+        // Step 1: Create TimeSheet
+        TimeSheet timesheet = new TimeSheet();
+            timesheet.setUserId(userId);
+            timesheet.setWorkDate(workDate);
+            timesheet = timeSheetRepository.save(timesheet);
+
 
         // Step 2: Save all entries
         for (TimeSheetEntryDTO dto : entriesDto) {
@@ -56,7 +61,17 @@ public class TimeSheetService {
             entry.setProjectId(dto.getProjectId());
             entry.setTaskId(dto.getTaskId());
             entry.setDescription(dto.getDescription());
-            entry.setWorkType(dto.getWorkType());
+        //     entry.setWorkType(dto.getWorkType());
+
+                if (entry.getWorkType() == null || entry.getWorkType().isBlank()) {
+                         entry.setWorkType("WFO");
+                }
+                else {
+                    entry.setWorkType(dto.getWorkType());
+                }
+
+
+            // entry.setWorkType(dto.getWorkType() != null ? dto.getWorkType() : "WFO");
             entry.setFromTime(dto.getFromTime());
             entry.setToTime(dto.getToTime());
             entry.setOtherDescription(dto.getOtherDescription());
