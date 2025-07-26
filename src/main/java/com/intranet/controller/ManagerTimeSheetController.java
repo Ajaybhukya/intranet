@@ -55,4 +55,15 @@ public class ManagerTimeSheetController {
         return ResponseEntity.ok("All pending timesheets updated to: " + status);
     }
 
+
+    @PutMapping("/approve/{managerId}/{userId}/{timesheetId}") // Approve or reject a specific timesheet allocated users only
+    public ResponseEntity<String> updateApprovalStatus(
+        @PathVariable Long managerId,
+        @PathVariable Long userId,
+        @PathVariable Long timesheetId,
+        @RequestParam String status
+    ) {
+    service.updateApprovalStatus(managerId, userId, timesheetId, status.toUpperCase());
+    return ResponseEntity.ok("Status updated successfully");
+}
 }

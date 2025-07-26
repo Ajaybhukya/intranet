@@ -2,6 +2,7 @@ package com.intranet.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -90,5 +91,8 @@ List<TimeSheetApproval> findByManagerIdAndStatusAndDateRange(
 List<TimeSheetApproval> findByManagerIdAndStatus(@Param("managerId") Long managerId,
                                                  @Param("status") String status);
 
+
+
+Optional<TimeSheetApproval> findByTimesheetIdAndApprover_UserIdAndApprover_ApproverId(Long timesheetId, Long userId, Long approverId);                                                 
 
 }
