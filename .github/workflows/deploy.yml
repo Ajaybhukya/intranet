@@ -25,7 +25,7 @@ jobs:
     - name: Build with Maven
       run: ./mvnw clean package -DskipTests
 
-    - name: Upload and overwrite JAR on EC2
+    - name: Upload and overwrite JAR on EC2  # upload/overwrite only TimesheetManagement.jar to EC2 app/
       uses: appleboy/scp-action@v0.1.7
       with:
         host: 3.7.242.65
@@ -34,6 +34,8 @@ jobs:
         source: "target/TimesheetManagement.jar"
         target: "/home/ubuntu/app/"
         overwrite: true
+        strip_components: 1
+
 
     - name: Restart Spring Boot service
       uses: appleboy/ssh-action@v1.0.3
