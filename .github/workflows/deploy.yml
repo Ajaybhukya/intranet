@@ -1,0 +1,44 @@
+name: Deploy Spring Boot App to EC2
+
+on:
+  push:
+    branches:
+      - maahishmati
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Build with Maven
+      run: ./mvnw clean package -DskipTests
+
+    - name: Upload and overwrite JAR on EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: 3.7.242.65                   # Replace with your EC2 IP
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}          # SSH private key (stored securely)
+        source: "target/*.jar"
+        target: "/home/ubuntu/app/TimesheetManagement.jar"
+
+    - name: Restart Spring Boot service
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 3.7.242.65
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
+        script: |
+          sudo systemctl daemon-reload
+          sudo systemctl restart TimesheetManagement
+          sudo systemctl status TimesheetManagement --no-pager
+
