@@ -28,11 +28,13 @@ jobs:
     - name: Upload and overwrite JAR on EC2
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: 3.7.242.65                   # Replace with your EC2 IP
+        host: 3.7.242.65
         username: ubuntu
-        key: ${{ secrets.EC2_KEY }}          # SSH private key (stored securely)
+        key: ${{ secrets.EC2_KEY }}
         source: "target/TimesheetManagement.jar"
-        target: "/home/ubuntu/app/TimesheetManagement.jar"
+        target: "/home/ubuntu/app/"
+        strip_components: 0
+        tar_exec: ""
 
     - name: Restart Spring Boot service
       uses: appleboy/ssh-action@v1.0.3
