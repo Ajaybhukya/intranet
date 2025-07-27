@@ -33,8 +33,7 @@ jobs:
         key: ${{ secrets.EC2_KEY }}
         source: "target/TimesheetManagement.jar"
         target: "/home/ubuntu/app/"
-        strip_components: 0
-        tar_exec: ""
+        overwrite: true
 
     - name: Restart Spring Boot service
       uses: appleboy/ssh-action@v1.0.3
