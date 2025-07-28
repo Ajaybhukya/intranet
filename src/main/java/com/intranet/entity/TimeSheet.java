@@ -37,7 +37,7 @@ public class TimeSheet {
     // @JoinColumn(name = "user_id")
     //private user user_id; // Foreign key from user table 
 
-    private Long userId;
+    private Integer userId;
 
     private LocalDate workDate;
 

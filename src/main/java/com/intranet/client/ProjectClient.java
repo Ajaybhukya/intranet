@@ -12,7 +12,7 @@ import com.intranet.dto.external.TaskDTO;
 public interface ProjectClient {
 
     @GetMapping("/projects/user/{userId}")
-    List<ProjectDTO> getProjectsByUserId(@PathVariable("userId") Long userId);
+    List<ProjectDTO> getProjectsByUserId(@PathVariable("userId") Integer userId);
 
     @GetMapping("/tasks/project/{projectId}")
     List<TaskDTO> getTasksByProjectId(@PathVariable("projectId") Long projectId);

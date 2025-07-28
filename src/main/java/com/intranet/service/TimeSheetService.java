@@ -30,7 +30,7 @@ public class TimeSheetService {
     @Autowired
     private TimeSheetApprovalRepo approvalRepository;
 
-    public List<TimeSheetHistoryDTO> getTimesheetHistoryForUser(Long userId) {
+    public List<TimeSheetHistoryDTO> getTimesheetHistoryForUser(Integer userId) {
         List<TimeSheet> sheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
         List<TimeSheetHistoryDTO> history = new ArrayList<>();
 
@@ -67,7 +67,7 @@ public class TimeSheetService {
     }
 
     // New method for logging (saving) a timesheet entry
-    public TimeSheetEntry logTimesheetEntry(Long userId, TimeSheetEntryDTO entryDto) {
+    public TimeSheetEntry logTimesheetEntry(Integer userId, TimeSheetEntryDTO entryDto) {
         TimeSheet timesheet = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId).stream()
                 .findFirst().orElse(new TimeSheet()); // Get or create timesheet
         timesheet.setUserId(userId);
@@ -93,7 +93,7 @@ public class TimeSheetService {
     }
 
     // method to edit/update a timesheet entry
-    public TimeSheetEntry editTimesheetEntry(Long userId, Long entryId, TimeSheetEntryDTO entryDto) {
+    public TimeSheetEntry editTimesheetEntry(Integer userId, Long entryId, TimeSheetEntryDTO entryDto) {
         TimeSheetEntry entry = entryRepository.findById(entryId)
                 .orElseThrow(() -> new RuntimeException("Entry not found"));
 

@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.intranet.client.ProjectClient;
 import com.intranet.dto.TimeSheetEntryDTO;
 import com.intranet.dto.TimeSheetHistoryDTO;
+import com.intranet.dto.UserDTO;
 import com.intranet.dto.external.ProjectDTO;
 import com.intranet.dto.external.TaskDTO;
-import com.intranet.dto.external.UserDTO;
 import com.intranet.entity.TimeSheetEntry;
 import com.intranet.service.TimeSheetService;
 

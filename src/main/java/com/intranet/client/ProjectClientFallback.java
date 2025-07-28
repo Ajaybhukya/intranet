@@ -14,7 +14,7 @@ import com.intranet.dto.external.TaskDTO;
 public class ProjectClientFallback implements ProjectClient {
 
     @Override
-    public List<ProjectDTO> getProjectsByUserId(Long userId) {
+    public List<ProjectDTO> getProjectsByUserId(Integer userId) {
         ProjectDTO mockProject = new ProjectDTO();
         mockProject.setId(1L);
         mockProject.setName("Mock Project");
