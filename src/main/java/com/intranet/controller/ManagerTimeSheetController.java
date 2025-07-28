@@ -1,9 +1,7 @@
 
 package com.intranet.controller;
-import java.time.LocalDate;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,16 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.intranet.dto.ManagerDetailedDTO;
-import com.intranet.dto.TeamTimeSheetDTO;
-import com.intranet.dto.TimeSheetApprovalDTO;
 import com.intranet.service.TimeSheetApprovalService;
-import com.intranet.service.TimeSheetService;
 @RestController
 @RequestMapping("/api/manager")
 public class ManagerTimeSheetController {
 
-    @Autowired
-    private TimeSheetService timeSheetService;
 
     @Autowired
     private TimeSheetApprovalService service;
