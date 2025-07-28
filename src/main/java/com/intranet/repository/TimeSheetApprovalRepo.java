@@ -93,6 +93,31 @@ List<TimeSheetApproval> findByManagerIdAndStatus(@Param("managerId") Long manage
 
 
 
-Optional<TimeSheetApproval> findByTimesheetIdAndApprover_UserIdAndApprover_ApproverId(Long timesheetId, Long userId, Long approverId);                                                 
+
+@Query("""
+    SELECT a FROM TimeSheetApproval a
+    WHERE a.approver.approverId = :managerId
+      AND a.approvalStatus = :status
+      AND a.timesheet.id IN :timesheetIds
+""")
+List<TimeSheetApproval> findByManagerAndTimesheetIds(
+        @Param("managerId") Long managerId,
+        @Param("status") String status,
+        @Param("timesheetIds") List<Long> timesheetIds
+);
+
+
+
+@Query("""
+    SELECT a FROM TimeSheetApproval a 
+    WHERE a.timesheet.id = :timesheetId 
+      AND a.approver.userId = :userId 
+      AND a.approver.approverId = :approverId
+""")
+Optional<TimeSheetApproval> findByTimesheetAndApprover(
+    @Param("timesheetId") Long timesheetId,
+    @Param("userId") Long userId,
+    @Param("approverId") Long approverId
+);
 
 }

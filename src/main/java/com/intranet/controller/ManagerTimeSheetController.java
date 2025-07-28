@@ -6,10 +6,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.intranet.dto.ApprovalStatusUpdateRequest;
 import com.intranet.dto.ManagerDetailedDTO;
 import com.intranet.service.TimeSheetApprovalService;
 @RestController
@@ -35,28 +37,32 @@ public class ManagerTimeSheetController {
         return ResponseEntity.ok(results);
     }
 
-        @PutMapping("/bulk/{managerId}") // Bulk approval or rejection
-    public ResponseEntity<String> updateTimesheetStatusesByManager(
-            @PathVariable Long managerId,
-            @RequestParam("status") String status
-    ) {
-        if (!"APPROVED".equals(status) && !"REJECTED".equals(status)) {
-            return ResponseEntity.badRequest().body("Invalid status. Use APPROVED or REJECTED only.");
-        }
-
-        service.bulkUpdateApprovals(managerId, status);
-        return ResponseEntity.ok("All pending timesheets updated to: " + status);
-    }
-
-
-    @PutMapping("/approve/{managerId}/{userId}/{timesheetId}") // Approve or reject a specific timesheet allocated users only
-    public ResponseEntity<String> updateApprovalStatus(
+        @PutMapping("/bulk/{managerId}")
+public ResponseEntity<String> updateSelectedTimesheetStatuses(
         @PathVariable Long managerId,
-        @PathVariable Long userId,
-        @PathVariable Long timesheetId,
-        @RequestParam String status
-    ) {
-    service.updateApprovalStatus(managerId, userId, timesheetId, status.toUpperCase());
+        @RequestParam("status") String status,
+        @RequestBody List<Long> timesheetIds
+) {
+    // if (!"APPROVED".equalsIgnoreCase(status) && !"REJECTED".equalsIgnoreCase(status)) {
+    //     return ResponseEntity.badRequest().body("Invalid status. Use APPROVED or REJECTED only.");
+    // }
+
+    int updated = service.bulkUpdateSelectedApprovals(managerId, status.toUpperCase(), timesheetIds);
+
+    return ResponseEntity.ok(updated + " timesheets updated to: " + status.toUpperCase());
+}
+
+
+
+  @PutMapping("/approve/{managerId}")
+public ResponseEntity<String> updateApprovalStatus(
+        @PathVariable Long managerId,
+        @RequestBody ApprovalStatusUpdateRequest request
+) {
+    service.updateApprovalStatus(managerId, request.getUserId(), request.getTimesheetId(), request.getStatus());
     return ResponseEntity.ok("Status updated successfully");
 }
+
+
+
 }
