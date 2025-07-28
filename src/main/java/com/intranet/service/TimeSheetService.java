@@ -36,22 +36,23 @@ public class TimeSheetService {
     @Autowired
     private UserApproverMapRepo userApproverMapRepo;
 
+    public void createTimeSheetWithEntriesAndApproval(Long userId, LocalDate workDate,
+            List<TimeSheetEntryDTO> entriesDto) {
 
+        // ✅ Step 0: Check if user is assigned to any manager
+        List<UserApproverMap> approver = userApproverMapRepo.findByUserId(userId);
+        if (approver == null || approver.isEmpty()) {
+            throw new IllegalArgumentException("User is not assigned to any manager. Cannot submit timesheet.");
+        }
 
-     public void createTimeSheetWithEntriesAndApproval(Long userId, LocalDate workDate, List<TimeSheetEntryDTO> entriesDto) {
-
-     // ✅ Step 0: Check if user is assigned to any manager
-    List<UserApproverMap> approver = userApproverMapRepo.findByUserId(userId);
-    if (approver == null || approver.isEmpty()) {
-        throw new IllegalArgumentException("User is not assigned to any manager. Cannot submit timesheet.");
-    }        
+        //validate entries
+        validateEntries(entriesDto);
 
         // Step 1: Create TimeSheet
         TimeSheet timesheet = new TimeSheet();
-            timesheet.setUserId(userId);
-            timesheet.setWorkDate(workDate);
-            timesheet = timeSheetRepository.save(timesheet);
-
+        timesheet.setUserId(userId);
+        timesheet.setWorkDate(workDate);
+        timesheet = timeSheetRepository.save(timesheet);
 
         // Step 2: Save all entries
         for (TimeSheetEntryDTO dto : entriesDto) {
@@ -60,15 +61,13 @@ public class TimeSheetService {
             entry.setProjectId(dto.getProjectId());
             entry.setTaskId(dto.getTaskId());
             entry.setDescription(dto.getDescription());
-        //     entry.setWorkType(dto.getWorkType());
+            // entry.setWorkType(dto.getWorkType());
 
-                if (entry.getWorkType() == null || entry.getWorkType().isBlank()) {
-                         entry.setWorkType("WFO");
-                }
-                else {
-                    entry.setWorkType(dto.getWorkType());
-                }
-
+            if (entry.getWorkType() == null || entry.getWorkType().isBlank()) {
+                entry.setWorkType("WFO");
+            } else {
+                entry.setWorkType(dto.getWorkType());
+            }
 
             // entry.setWorkType(dto.getWorkType() != null ? dto.getWorkType() : "WFO");
             entry.setFromTime(dto.getFromTime());
@@ -99,34 +98,129 @@ public class TimeSheetService {
         }
     }
 
-
-
     public List<TimeSheetResponseDTO> getUserTimeSheetHistory(Long userId) {
-    List<TimeSheet> timesheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
+        List<TimeSheet> timesheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
 
-    return timesheets.stream().map(ts -> {
-        TimeSheetResponseDTO dto = new TimeSheetResponseDTO();
-        dto.setTimesheetId(ts.getId());
-        dto.setWorkDate(ts.getWorkDate());
-        dto.setCreatedAt(ts.getCreatedAt());
+        return timesheets.stream().map(ts -> {
+            TimeSheetResponseDTO dto = new TimeSheetResponseDTO();
+            dto.setTimesheetId(ts.getId());
+            dto.setWorkDate(ts.getWorkDate());
+            dto.setCreatedAt(ts.getCreatedAt());
 
-        List<TimeSheetEntryResponseDTO> entryDTOs = ts.getEntries().stream().map(entry -> {
-            TimeSheetEntryResponseDTO entryDto = new TimeSheetEntryResponseDTO();
-            entryDto.setTimesheetEntryId(entry.getTimesheetEntryId());
-            entryDto.setProjectId(entry.getProjectId());
-            entryDto.setTaskId(entry.getTaskId());
-            entryDto.setDescription(entry.getDescription());
-            entryDto.setWorkType(entry.getWorkType());
-            entryDto.setFromTime(entry.getFromTime());
-            entryDto.setToTime(entry.getToTime());
-            entryDto.setHoursWorked(entry.getHoursWorked());
-            entryDto.setOtherDescription(entry.getOtherDescription());
-            return entryDto;
+            List<TimeSheetEntryResponseDTO> entryDTOs = ts.getEntries().stream().map(entry -> {
+                TimeSheetEntryResponseDTO entryDto = new TimeSheetEntryResponseDTO();
+                entryDto.setTimesheetEntryId(entry.getTimesheetEntryId());
+                entryDto.setProjectId(entry.getProjectId());
+                entryDto.setTaskId(entry.getTaskId());
+                entryDto.setDescription(entry.getDescription());
+                entryDto.setWorkType(entry.getWorkType());
+                entryDto.setFromTime(entry.getFromTime());
+                entryDto.setToTime(entry.getToTime());
+                entryDto.setHoursWorked(entry.getHoursWorked());
+                entryDto.setOtherDescription(entry.getOtherDescription());
+                return entryDto;
+            }).toList();
+
+            dto.setEntries(entryDTOs);
+            return dto;
         }).toList();
+    }
 
-        dto.setEntries(entryDTOs);
-        return dto;
-    }).toList();
-}
+    public void updateTimeSheet(Long user_id,TimeSheetResponseDTO timeSheetDto) {
+        TimeSheet timeSheet = timeSheetRepository.findById(timeSheetDto.getTimesheetId())
+                .orElseThrow(() -> new IllegalArgumentException("Timesheet not found"));
 
+        // Check if the user is authorized to update this timesheet
+        if (!timeSheet.getUserId().equals(user_id)) {
+            throw new IllegalArgumentException("You are not authorized to update this timesheet");
+        }
+
+        // Check if the timesheet is already approved
+        List<TimeSheetApproval> approvals = timeSheetApprovalRepo.findByTimesheetId(timeSheet.getId());
+        if (approvals.stream().anyMatch(a -> "APPROVED".equalsIgnoreCase(a.getApprovalStatus()))) {
+            throw new IllegalArgumentException("Cannot update an approved timesheet");
+        }
+
+        // Validate entries
+        List<TimeSheetEntryDTO> entries;
+        if (timeSheetDto.getEntries() == null || timeSheetDto.getEntries().isEmpty()) {
+            throw new IllegalArgumentException("No entries provided for update");
+        } else {
+            entries = timeSheetDto.getEntries().stream()
+                    .map(entryDto -> {
+                        TimeSheetEntryDTO dto = new TimeSheetEntryDTO();
+                        dto.setProjectId(entryDto.getProjectId());
+                        dto.setTaskId(entryDto.getTaskId());
+                        dto.setDescription(entryDto.getDescription());
+                        dto.setWorkType(entryDto.getWorkType());
+                        dto.setFromTime(entryDto.getFromTime());
+                        dto.setToTime(entryDto.getToTime());
+                        dto.setHoursWorked(entryDto.getHoursWorked());
+                        dto.setOtherDescription(entryDto.getOtherDescription());
+                        return dto;
+                    }).toList();
+        }
+        validateEntries(entries);
+
+        // Update work date
+        if (timeSheetDto.getWorkDate() != null) {
+            timeSheet.setWorkDate(timeSheetDto.getWorkDate());
+        }
+
+        // Update entries
+        for (TimeSheetEntryResponseDTO entryDto : timeSheetDto.getEntries()) {
+            TimeSheetEntry entry = timeSheetEntryRepo.findById(entryDto.getTimesheetEntryId())
+                    .orElseThrow(() -> new IllegalArgumentException("Entry not found"));
+
+            entry.setProjectId(entryDto.getProjectId());
+            entry.setTaskId(entryDto.getTaskId());
+            entry.setDescription(entryDto.getDescription());
+            entry.setWorkType(entryDto.getWorkType());
+            entry.setFromTime(entryDto.getFromTime());
+            entry.setToTime(entryDto.getToTime());
+            entry.setOtherDescription(entryDto.getOtherDescription());
+
+            if (entry.getFromTime() != null && entry.getToTime() != null) {
+                long hours = Duration.between(entry.getFromTime(), entry.getToTime()).toMinutes();
+                entry.setHoursWorked(BigDecimal.valueOf(hours / 60.0));
+            } else {
+                entry.setHoursWorked(entryDto.getHoursWorked());
+            }
+
+            timeSheetEntryRepo.save(entry);
+        }
+
+        timeSheetRepository.save(timeSheet);
+    }
+
+    private boolean validateEntries(List<TimeSheetEntryDTO> entries) {
+        // Implement validation logic for entries check if entries overlap and if the total hours exceed a certain limit
+
+        // total hours should not exceed 24 in a day
+        BigDecimal totalHours = entries.stream()
+                .map(TimeSheetEntryDTO::getHoursWorked)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        if (totalHours.compareTo(BigDecimal.valueOf(24)) > 0) {
+            throw new IllegalArgumentException("Total hours worked in a day cannot exceed 24 hours.");
+        }
+        // Check for overlapping entries
+        for (int i = 0; i < entries.size(); i++) {
+            TimeSheetEntryDTO entry1 = entries.get(i);
+            for (int j = i + 1; j < entries.size(); j++) {
+                TimeSheetEntryDTO entry2 = entries.get(j);
+                if (entry1.getFromTime() != null && entry1.getToTime() != null &&
+                    entry2.getFromTime() != null && entry2.getToTime() != null) {
+                    if ((entry1.getFromTime().isBefore(entry2.getToTime()) &&
+                         entry1.getToTime().isAfter(entry2.getFromTime())) ||
+                        (entry2.getFromTime().isBefore(entry1.getToTime()) &&
+                         entry2.getToTime().isAfter(entry1.getFromTime()))) {
+                        throw new IllegalArgumentException("Entries overlap in time.");
+                    }
+                }
+            }
+        }
+
+        return true; // Placeholder for actual validation logic
+    }
 }

@@ -48,13 +48,4 @@ public class TimeSheetEntry {
 
     private String otherDescription;
 
-    public String getStatus() {
-        
-        if (timesheet != null) {
-            return timesheet.getStatus();
-        }else{
-            // no timesheet associated
-            return "PENDING";
-        }
-    }
 }

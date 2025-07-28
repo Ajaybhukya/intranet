@@ -1,10 +1,11 @@
 
 package com.intranet.controller;
+
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,56 +14,58 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.intranet.dto.ApprovalStatusUpdateRequest;
 import com.intranet.dto.ManagerDetailedDTO;
+import com.intranet.dto.UserDTO;
+import com.intranet.security.CurrentUser;
 import com.intranet.service.TimeSheetApprovalService;
+
 @RestController
 @RequestMapping("/api/manager")
 public class ManagerTimeSheetController {
 
-
     @Autowired
     private TimeSheetApprovalService service;
 
-    @GetMapping("/detailed/{managerId}")
-    public ResponseEntity<List<ManagerDetailedDTO>> getDetailedTimesheets(@PathVariable Long managerId) {
-        List<ManagerDetailedDTO> detailedList = service.getManagerDetailedData(managerId);
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @GetMapping("/detailed")
+    public ResponseEntity<List<ManagerDetailedDTO>> getDetailedTimesheets(@CurrentUser UserDTO manager) {
+        List<ManagerDetailedDTO> detailedList = service.getManagerDetailedData(manager.getId());
         return ResponseEntity.ok(detailedList);
     }
 
-    @GetMapping("/filter/{managerId}") // BY Status
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @GetMapping("/filter") // BY Status
     public ResponseEntity<List<ManagerDetailedDTO>> getRecentTimesheetsByManager(
-            @PathVariable Long managerId,
-            @RequestParam(required = false) String approvalStatus
-    ) {
-        List<ManagerDetailedDTO> results = service.getRecentTimesheets(managerId, approvalStatus);
+            @RequestParam(required = false) String approvalStatus,
+            @CurrentUser UserDTO manager) {
+        List<ManagerDetailedDTO> results = service.getRecentTimesheets(manager.getId(), approvalStatus);
         return ResponseEntity.ok(results);
     }
 
-        @PutMapping("/bulk/{managerId}")
-public ResponseEntity<String> updateSelectedTimesheetStatuses(
-        @PathVariable Long managerId,
-        @RequestParam("status") String status,
-        @RequestBody List<Long> timesheetIds
-) {
-    // if (!"APPROVED".equalsIgnoreCase(status) && !"REJECTED".equalsIgnoreCase(status)) {
-    //     return ResponseEntity.badRequest().body("Invalid status. Use APPROVED or REJECTED only.");
-    // }
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PutMapping("/bulk")
+    public ResponseEntity<String> updateSelectedTimesheetStatuses(
+            @RequestParam("status") String status,
+            @RequestBody List<Long> timesheetIds,
+            @CurrentUser UserDTO manager) {
+        // if (!"APPROVED".equalsIgnoreCase(status) &&
+        // !"REJECTED".equalsIgnoreCase(status)) {
+        // return ResponseEntity.badRequest().body("Invalid status. Use APPROVED or
+        // REJECTED only.");
+        // }
 
-    int updated = service.bulkUpdateSelectedApprovals(managerId, status.toUpperCase(), timesheetIds);
+        int updated = service.bulkUpdateSelectedApprovals(manager.getId(), status.toUpperCase(), timesheetIds);
 
-    return ResponseEntity.ok(updated + " timesheets updated to: " + status.toUpperCase());
-}
+        return ResponseEntity.ok(updated + " timesheets updated to: " + status.toUpperCase());
+    }
 
-
-
-  @PutMapping("/approve/{managerId}")
-public ResponseEntity<String> updateApprovalStatus(
-        @PathVariable Long managerId,
-        @RequestBody ApprovalStatusUpdateRequest request
-) {
-    service.updateApprovalStatus(managerId, request.getUserId(), request.getTimesheetId(), request.getStatus());
-    return ResponseEntity.ok("Status updated successfully");
-}
-
-
+    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PutMapping("/approve")
+    public ResponseEntity<String> updateApprovalStatus(
+            @CurrentUser UserDTO manager,
+            @RequestBody ApprovalStatusUpdateRequest request) {
+        service.updateApprovalStatus(manager.getId(), request.getUserId(), request.getTimesheetId(),
+                request.getStatus());
+        return ResponseEntity.ok("Status updated successfully");
+    }
 
 }

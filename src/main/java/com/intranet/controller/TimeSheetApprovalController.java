@@ -2,6 +2,7 @@ package com.intranet.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.intranet.dto.PendingApprovalDTO;
@@ -25,11 +26,7 @@ public class TimeSheetApprovalController {
     //     return service.createApproval(dto);
     // }
 
-    @GetMapping("/pending-users")
-    public List<PendingApprovalDTO> getPendingUserManagerPairs() {
-    return service.getPendingUserManagerPairs();
-    }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/users-by-status")
     public List<PendingApprovalDTO> getUserManagerPairsByStatus(
             @RequestParam(required = false) String status) {

@@ -28,6 +28,7 @@ public class UserApproverMapService {
         ))
         .collect(Collectors.toList());
     }
+    
     public UserApproverMapDTO createMapping(UserApproverMapDTO dto) {UserApproverMap entity = new UserApproverMap();
     entity.setUserId(dto.getUserId());
     entity.setApproverId(dto.getApproverId());
