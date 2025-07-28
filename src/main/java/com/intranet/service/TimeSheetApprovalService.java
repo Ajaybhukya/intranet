@@ -3,6 +3,7 @@ package com.intranet.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import com.intranet.entity.TimeSheet;
 import com.intranet.entity.TimeSheetApproval;
 import com.intranet.entity.UserApproverMap;
 import com.intranet.repository.TimeSheetApprovalRepo;
+import com.intranet.repository.UserApproverMapRepo;
 
 @Service
 public class TimeSheetApprovalService {
@@ -22,6 +24,8 @@ public class TimeSheetApprovalService {
     @Autowired
     private TimeSheetApprovalRepo repo;
 
+    @Autowired
+    private UserApproverMapRepo userApproverMapRepo;
 
 
     public List<TimeSheetApprovalDTO> getApprovalsByTimesheetId(Long timesheetId) {
@@ -110,30 +114,47 @@ public List<ManagerDetailedDTO> getManagerDetailedData(Long managerId) {
     }).toList();
 }
 
-public void bulkUpdateApprovals(Long managerId, String status) {
-    List<TimeSheetApproval> approvals = repo.findByManagerIdAndStatus(managerId, "PENDING");
+public int bulkUpdateSelectedApprovals(Long managerId, String status, List<Long> timesheetIds) {
+    // Step 1: Get users under this manager
+    List<UserApproverMap> mappedUsers = userApproverMapRepo.findByApproverId(managerId);
+    Set<Long> allowedUserIds = mappedUsers.stream()
+            .map(UserApproverMap::getUserId)
+            .collect(Collectors.toSet());
 
-    for (TimeSheetApproval approval : approvals) {
+    // Step 2: Get all approvals that match manager, status=PENDING, and timesheet ID in list
+    List<TimeSheetApproval> approvals = repo.findByManagerAndTimesheetIds(managerId, "PENDING", timesheetIds);
+
+    // Step 3: Filter approvals where the timesheet belongs to users mapped to this manager
+    List<TimeSheetApproval> validApprovals = approvals.stream()
+            .filter(approval -> allowedUserIds.contains(approval.getTimesheet().getUserId()))
+            .collect(Collectors.toList());
+
+    // Step 4: Update
+    for (TimeSheetApproval approval : validApprovals) {
         approval.setApprovalStatus(status);
         approval.setApprovalTime(LocalDateTime.now());
     }
 
-    repo.saveAll(approvals);
+    repo.saveAll(validApprovals);
+
+    return validApprovals.size();
 }
 
 
 public void updateApprovalStatus(Long managerId, Long userId, Long timesheetId, String status) {
-    // if (!status.equals("APPROVED") && !status.equals("REJECTED")) {
-    //     throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
-    // }
+    if (!"APPROVED".equalsIgnoreCase(status) && !"REJECTED".equalsIgnoreCase(status)) {
+        throw new IllegalArgumentException("Status must be APPROVED or REJECTED");
+    }
 
     TimeSheetApproval approval = repo
-        .findByTimesheetIdAndApprover_UserIdAndApprover_ApproverId(timesheetId, userId, managerId)
-        .orElseThrow(() -> new RuntimeException("Approval record not found"));
+        .findByTimesheetAndApprover(timesheetId, userId, managerId)
+        .orElseThrow(() -> new RuntimeException("No approval record found for given manager, user, and timesheet"));
 
-    approval.setApprovalStatus(status);
-    approval.setApprovalTime(LocalDateTime.now()); // optional update
+    approval.setApprovalStatus(status.toUpperCase());
+    approval.setApprovalTime(LocalDateTime.now());
+
     repo.save(approval);
 }
+
 
 }
