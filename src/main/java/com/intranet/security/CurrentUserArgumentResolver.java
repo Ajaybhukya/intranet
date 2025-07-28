@@ -31,7 +31,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
 
         Jwt jwt = (Jwt) auth.getPrincipal();
         return new UserDTO(
-            Integer.parseInt(jwt.getClaimAsString("user_id")), // Assuming user_id is an Integer
+            Long.valueOf(jwt.getClaimAsString("user_id")), // Assuming user_id is an Integer
             jwt.getClaim("email"),
             jwt.getClaimAsStringList("roles")
         );
