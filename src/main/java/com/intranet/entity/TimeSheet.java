@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.CreationTimestamp;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -32,11 +30,6 @@ public class TimeSheet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "timesheet_id")
     private Long id;
-
-    // @ManyToOne
-    // @JoinColumn(name = "user_id")
-    //private user user_id; // Foreign key from user table 
-
     private Long userId;
 
     private LocalDate workDate;

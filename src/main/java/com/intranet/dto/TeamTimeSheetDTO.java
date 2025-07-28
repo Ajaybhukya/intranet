@@ -1,19 +1,16 @@
 package com.intranet.dto;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TimeSheetHistoryDTO {
+public class TeamTimeSheetDTO {
+    private Long timeSheetId;
+    private Long userId;
     private LocalDate workDate;
-    private List<TimeSheetEntryDTO> entries;
-    private List<TimeSheetApprovalDTO> approvals;
 }
-
-

@@ -5,18 +5,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TimeSheetEntryDTO {
+public class ManagerDetailedDTO {
+    private Long userId;
+    private Long timesheetId;
     private Long projectId;
     private Long taskId;
-    private String description;
-    private String workType;
-    private LocalDateTime fromTime;
-    private LocalDateTime toTime;
     private BigDecimal hoursWorked;
-    private String otherDescription;
+    private String approvalStatus;
+    private String description;
+    private LocalDate workDate;
+
 }

@@ -28,7 +28,7 @@ public class TimeSheetApproval {
 
     @ManyToOne
     @JoinColumn(name = "timesheetId")
-    private TimeSheet timesheet;
+    private TimeSheet timesheet;    
 
     @ManyToOne
     @JoinColumn(name = "userApproverMapId")
@@ -41,5 +41,4 @@ public class TimeSheetApproval {
 
     @Column(nullable = false)
     private LocalDateTime approvalTime = LocalDateTime.now();
-
 }
