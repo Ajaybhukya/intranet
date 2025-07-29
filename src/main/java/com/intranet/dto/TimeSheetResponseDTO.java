@@ -1,3 +1,5 @@
+
+
 package com.intranet.dto;
 
 import lombok.AllArgsConstructor;
@@ -15,5 +17,6 @@ public class TimeSheetResponseDTO {
     private Long timesheetId;
     private LocalDate workDate;
     private LocalDateTime createdAt;
+    private String approvalStatus; // <-- Added this field
     private List<TimeSheetEntryResponseDTO> entries;
 }

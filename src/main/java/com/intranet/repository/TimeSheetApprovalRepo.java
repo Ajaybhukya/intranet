@@ -120,4 +120,7 @@ Optional<TimeSheetApproval> findByTimesheetAndApprover(
     @Param("approverId") Long approverId
 );
 
+
+Optional<TimeSheetApproval> findFirstByTimesheet_Id(Long timesheetId);
+
 }

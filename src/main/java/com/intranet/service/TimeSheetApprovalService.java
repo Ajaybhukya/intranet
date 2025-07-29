@@ -3,6 +3,7 @@ package com.intranet.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -155,6 +156,5 @@ public void updateApprovalStatus(Long managerId, Long userId, Long timesheetId, 
 
     repo.save(approval);
 }
-
 
 }

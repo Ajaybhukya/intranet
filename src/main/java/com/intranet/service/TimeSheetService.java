@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -99,32 +100,38 @@ public class TimeSheetService {
     }
 
     public List<TimeSheetResponseDTO> getUserTimeSheetHistory(Long userId) {
-        List<TimeSheet> timesheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
+    List<TimeSheet> timesheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
 
-        return timesheets.stream().map(ts -> {
-            TimeSheetResponseDTO dto = new TimeSheetResponseDTO();
-            dto.setTimesheetId(ts.getId());
-            dto.setWorkDate(ts.getWorkDate());
-            dto.setCreatedAt(ts.getCreatedAt());
+    return timesheets.stream().map(ts -> {
+        TimeSheetResponseDTO dto = new TimeSheetResponseDTO();
+        dto.setTimesheetId(ts.getId());
+        dto.setWorkDate(ts.getWorkDate());
+        dto.setCreatedAt(ts.getCreatedAt());
 
-            List<TimeSheetEntryResponseDTO> entryDTOs = ts.getEntries().stream().map(entry -> {
-                TimeSheetEntryResponseDTO entryDto = new TimeSheetEntryResponseDTO();
-                entryDto.setTimesheetEntryId(entry.getTimesheetEntryId());
-                entryDto.setProjectId(entry.getProjectId());
-                entryDto.setTaskId(entry.getTaskId());
-                entryDto.setDescription(entry.getDescription());
-                entryDto.setWorkType(entry.getWorkType());
-                entryDto.setFromTime(entry.getFromTime());
-                entryDto.setToTime(entry.getToTime());
-                entryDto.setHoursWorked(entry.getHoursWorked());
-                entryDto.setOtherDescription(entry.getOtherDescription());
-                return entryDto;
-            }).toList();
+        // Fetch approval status (optional: pick latest or first if multiple)
+        Optional<TimeSheetApproval> approvalOpt = timeSheetApprovalRepo.findFirstByTimesheet_Id(ts.getId());
+        dto.setApprovalStatus(approvalOpt.map(TimeSheetApproval::getApprovalStatus).orElse("PENDING"));
 
-            dto.setEntries(entryDTOs);
-            return dto;
+        // Map entries
+        List<TimeSheetEntryResponseDTO> entryDTOs = ts.getEntries().stream().map(entry -> {
+            TimeSheetEntryResponseDTO entryDto = new TimeSheetEntryResponseDTO();
+            entryDto.setTimesheetEntryId(entry.getTimesheetEntryId());
+            entryDto.setProjectId(entry.getProjectId());
+            entryDto.setTaskId(entry.getTaskId());
+            entryDto.setDescription(entry.getDescription());
+            entryDto.setWorkType(entry.getWorkType());
+            entryDto.setFromTime(entry.getFromTime());
+            entryDto.setToTime(entry.getToTime());
+            entryDto.setHoursWorked(entry.getHoursWorked());
+            entryDto.setOtherDescription(entry.getOtherDescription());
+            return entryDto;
         }).toList();
-    }
+
+        dto.setEntries(entryDTOs);
+        return dto;
+    }).toList();
+}
+
 
     public void updateTimeSheet(Long user_id,TimeSheetResponseDTO timeSheetDto) {
         TimeSheet timeSheet = timeSheetRepository.findById(timeSheetDto.getTimesheetId())
