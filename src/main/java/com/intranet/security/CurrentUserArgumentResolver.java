@@ -2,6 +2,7 @@ package com.intranet.security;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -24,16 +25,24 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, org.springframework.web.bind.support.WebDataBinderFactory binderFactory) {
 
-        Authentication auth = (Authentication) webRequest.getUserPrincipal();
-        if (auth == null || !(auth.getPrincipal() instanceof Jwt)) {
-            return null;
-        }
+        // Authentication auth = (Authentication) webRequest.getUserPrincipal();
+        // if (auth == null || !(auth.getPrincipal() instanceof Jwt)) {
+        //     return null;
+        // }
 
-        Jwt jwt = (Jwt) auth.getPrincipal();
-        return new UserDTO(
-            Long.valueOf(jwt.getClaimAsString("user_id")), // Assuming user_id is an Integer
-            jwt.getClaim("email"),
-            jwt.getClaimAsStringList("roles")
-        );
+        // Jwt jwt = (Jwt) auth.getPrincipal();
+        // return new UserDTO(
+        //     Long.valueOf(jwt.getClaimAsString("user_id")), // Assuming user_id is an Integer
+        //     jwt.getClaim("email"),
+        //     jwt.getClaimAsStringList("roles")
+        // );
+
+        // create a sample DTO for now
+        
+        UserDTO dto=new UserDTO();
+        dto.setId(1L);
+        dto.setEmail("test@gmail.com");
+        dto.setRoles(null);
+        return dto;
     }
 }
