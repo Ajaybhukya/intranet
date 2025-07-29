@@ -34,6 +34,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         // return new UserDTO(
         //     Long.valueOf(jwt.getClaimAsString("user_id")), // Assuming user_id is an Integer
         //     jwt.getClaim("email"),
+        //     jwt.getClaimAsString("name"),
         //     jwt.getClaimAsStringList("roles")
         // );
 
@@ -41,6 +42,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         
         UserDTO dto=new UserDTO();
         dto.setId(1L);
+        dto.setName("Ajay Kumar");
         dto.setEmail("test@gmail.com");
         dto.setRoles(null);
         return dto;
