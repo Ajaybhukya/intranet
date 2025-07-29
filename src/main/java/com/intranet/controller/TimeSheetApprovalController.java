@@ -9,6 +9,8 @@ import com.intranet.dto.PendingApprovalDTO;
 import com.intranet.dto.TimeSheetApprovalDTO;
 import com.intranet.service.TimeSheetApprovalService;
 
+
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/timesheet-approval")
 public class TimeSheetApprovalController {
