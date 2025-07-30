@@ -46,7 +46,16 @@ public class TimeSheetService {
             throw new IllegalArgumentException("User is not assigned to any manager. Cannot submit timesheet.");
         }
 
-        //validate entries
+        for (TimeSheetEntryDTO dto : entriesDto) {
+            if (dto.getFromTime() != null && dto.getToTime() != null) {
+                long minutes = Duration.between(dto.getFromTime(), dto.getToTime()).toMinutes();
+                dto.setHoursWorked(BigDecimal.valueOf(minutes / 60.0));
+            } else if (dto.getHoursWorked() == null) {
+                dto.setHoursWorked(BigDecimal.ZERO); // ✅ Fallback if both time and hours are missing
+            }
+        }
+
+        // validate entries
         validateEntries(entriesDto);
 
         // Step 1: Create TimeSheet
@@ -64,11 +73,20 @@ public class TimeSheetService {
             entry.setDescription(dto.getDescription());
             // entry.setWorkType(dto.getWorkType());
 
-            if (entry.getWorkType() == null || entry.getWorkType().isBlank()) {
-                entry.setWorkType("WFO");
-            } else {
-                entry.setWorkType(dto.getWorkType());
+            // if (entry.getWorkType() == null || entry.getWorkType().isBlank()) {
+            // entry.setWorkType("WFO");
+            // } else {
+            // entry.setWorkType(dto.getWorkType());
+            // }
+
+            String workType = dto.getWorkType();
+            if (workType == null || workType.isBlank()) {
+                workType = "WFO";
             }
+            System.out.println("----------------------------------------------------------------------------------------------------------------------------");
+            System.out.println("Work Type: " + workType);
+            System.out.println(workType.getClass().getName());
+            entry.setWorkType(workType);
 
             // entry.setWorkType(dto.getWorkType() != null ? dto.getWorkType() : "WFO");
             entry.setFromTime(dto.getFromTime());
@@ -100,40 +118,39 @@ public class TimeSheetService {
     }
 
     public List<TimeSheetResponseDTO> getUserTimeSheetHistory(Long userId) {
-    List<TimeSheet> timesheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
+        List<TimeSheet> timesheets = timeSheetRepository.findByUserIdOrderByWorkDateDesc(userId);
 
-    return timesheets.stream().map(ts -> {
-        TimeSheetResponseDTO dto = new TimeSheetResponseDTO();
-        dto.setTimesheetId(ts.getId());
-        dto.setWorkDate(ts.getWorkDate());
-        dto.setCreatedAt(ts.getCreatedAt());
+        return timesheets.stream().map(ts -> {
+            TimeSheetResponseDTO dto = new TimeSheetResponseDTO();
+            dto.setTimesheetId(ts.getId());
+            dto.setWorkDate(ts.getWorkDate());
+            dto.setCreatedAt(ts.getCreatedAt());
 
-        // Fetch approval status (optional: pick latest or first if multiple)
-        Optional<TimeSheetApproval> approvalOpt = timeSheetApprovalRepo.findFirstByTimesheet_Id(ts.getId());
-        dto.setApprovalStatus(approvalOpt.map(TimeSheetApproval::getApprovalStatus).orElse("PENDING"));
+            // Fetch approval status (optional: pick latest or first if multiple)
+            Optional<TimeSheetApproval> approvalOpt = timeSheetApprovalRepo.findFirstByTimesheet_Id(ts.getId());
+            dto.setApprovalStatus(approvalOpt.map(TimeSheetApproval::getApprovalStatus).orElse("PENDING"));
 
-        // Map entries
-        List<TimeSheetEntryResponseDTO> entryDTOs = ts.getEntries().stream().map(entry -> {
-            TimeSheetEntryResponseDTO entryDto = new TimeSheetEntryResponseDTO();
-            entryDto.setTimesheetEntryId(entry.getTimesheetEntryId());
-            entryDto.setProjectId(entry.getProjectId());
-            entryDto.setTaskId(entry.getTaskId());
-            entryDto.setDescription(entry.getDescription());
-            entryDto.setWorkType(entry.getWorkType());
-            entryDto.setFromTime(entry.getFromTime());
-            entryDto.setToTime(entry.getToTime());
-            entryDto.setHoursWorked(entry.getHoursWorked());
-            entryDto.setOtherDescription(entry.getOtherDescription());
-            return entryDto;
+            // Map entries
+            List<TimeSheetEntryResponseDTO> entryDTOs = ts.getEntries().stream().map(entry -> {
+                TimeSheetEntryResponseDTO entryDto = new TimeSheetEntryResponseDTO();
+                entryDto.setTimesheetEntryId(entry.getTimesheetEntryId());
+                entryDto.setProjectId(entry.getProjectId());
+                entryDto.setTaskId(entry.getTaskId());
+                entryDto.setDescription(entry.getDescription());
+                entryDto.setWorkType(entry.getWorkType());
+                entryDto.setFromTime(entry.getFromTime());
+                entryDto.setToTime(entry.getToTime());
+                entryDto.setHoursWorked(entry.getHoursWorked());
+                entryDto.setOtherDescription(entry.getOtherDescription());
+                return entryDto;
+            }).toList();
+
+            dto.setEntries(entryDTOs);
+            return dto;
         }).toList();
+    }
 
-        dto.setEntries(entryDTOs);
-        return dto;
-    }).toList();
-}
-
-
-    public void updateTimeSheet(Long user_id,TimeSheetResponseDTO timeSheetDto) {
+    public void updateTimeSheet(Long user_id, TimeSheetResponseDTO timeSheetDto) {
         TimeSheet timeSheet = timeSheetRepository.findById(timeSheetDto.getTimesheetId())
                 .orElseThrow(() -> new IllegalArgumentException("Timesheet not found"));
 
@@ -201,7 +218,8 @@ public class TimeSheetService {
     }
 
     private boolean validateEntries(List<TimeSheetEntryDTO> entries) {
-        // Implement validation logic for entries check if entries overlap and if the total hours exceed a certain limit
+        // Implement validation logic for entries check if entries overlap and if the
+        // total hours exceed a certain limit
 
         // total hours should not exceed 24 in a day
         BigDecimal totalHours = entries.stream()
@@ -217,11 +235,11 @@ public class TimeSheetService {
             for (int j = i + 1; j < entries.size(); j++) {
                 TimeSheetEntryDTO entry2 = entries.get(j);
                 if (entry1.getFromTime() != null && entry1.getToTime() != null &&
-                    entry2.getFromTime() != null && entry2.getToTime() != null) {
+                        entry2.getFromTime() != null && entry2.getToTime() != null) {
                     if ((entry1.getFromTime().isBefore(entry2.getToTime()) &&
-                         entry1.getToTime().isAfter(entry2.getFromTime())) ||
-                        (entry2.getFromTime().isBefore(entry1.getToTime()) &&
-                         entry2.getToTime().isAfter(entry1.getFromTime()))) {
+                            entry1.getToTime().isAfter(entry2.getFromTime())) ||
+                            (entry2.getFromTime().isBefore(entry1.getToTime()) &&
+                                    entry2.getToTime().isAfter(entry1.getFromTime()))) {
                         throw new IllegalArgumentException("Entries overlap in time.");
                     }
                 }

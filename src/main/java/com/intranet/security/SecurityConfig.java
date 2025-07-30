@@ -1,5 +1,8 @@
 package com.intranet.security;
 
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,12 +27,13 @@ public class SecurityConfig {
         ).permitAll()
         .anyRequest().authenticated()
       )
-      .oauth2ResourceServer(oauth2 -> oauth2
-        .jwt(jwt -> jwt
-          .jwtAuthenticationConverter(jwtAuthenticationConverter())
-        )
-      ).csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity, enable if needed
-      .cors(cors -> cors.disable());
+      // .oauth2ResourceServer(oauth2 -> oauth2
+      //   .jwt(jwt -> jwt
+      //     .jwtAuthenticationConverter(jwtAuthenticationConverter())
+      //   )
+      // )
+      .csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity, enable if needed
+      .cors(withDefaults()); // Enable CORS
 
 
     return http.build();

@@ -1,5 +1,6 @@
 package com.intranet.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,8 +22,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "time_sheet_entry", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"timesheetId", "taskId", "projectId"}))
+@Table(name = "time_sheet_entry", uniqueConstraints = @UniqueConstraint(columnNames = { "timesheetId", "taskId",
+        "projectId" }))
 public class TimeSheetEntry {
 
     @Id
@@ -34,10 +35,11 @@ public class TimeSheetEntry {
     private TimeSheet timesheet;
 
     private Long projectId; // external Project reference
-    private Long taskId;    // external tasks reference
+    private Long taskId; // external tasks reference
 
     private String description;
 
+    
     private String workType;
 
     private LocalDateTime fromTime;
