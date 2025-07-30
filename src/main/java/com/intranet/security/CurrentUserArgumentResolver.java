@@ -1,5 +1,8 @@
 package com.intranet.security;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
@@ -44,7 +47,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         dto.setId(1L);
         dto.setName("Ajay Kumar");
         dto.setEmail("test@gmail.com");
-        dto.setRoles(null);
+        dto.setRoles(Collections.emptyList());
         return dto;
     }
 }

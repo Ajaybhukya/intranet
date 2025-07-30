@@ -28,7 +28,8 @@ public class SecurityConfig {
         .jwt(jwt -> jwt
           .jwtAuthenticationConverter(jwtAuthenticationConverter())
         )
-      );
+      ).csrf(csrf -> csrf.disable()) // Disable CSRF for simplicity, enable if needed
+      .cors(cors -> cors.disable());
 
 
     return http.build();
