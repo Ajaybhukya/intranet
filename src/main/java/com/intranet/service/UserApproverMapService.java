@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.intranet.controller.UserController;
 import com.intranet.dto.ApproverDTO;
 import com.intranet.dto.ApproverUserListDTO;
 import com.intranet.dto.UserApproverIdListDTO;
@@ -76,16 +77,23 @@ public class UserApproverMapService {
     
     
 public List<UserApproverSummaryDTO> getUserApproverSummary() {
+
+    List<UserSDTO> mockUsers = UserController.getAllMockUsers();
     // 🔹 Mock users
-    List<UserSDTO> mockUsers = List.of(
-        new UserSDTO(1L, "Ajay Kumar", "ajay@example.com"),
-        new UserSDTO(2L, "Sonal Mehta", "sonal@example.com"),
-        new UserSDTO(3L, "Rahul Sharma", "rahul@example.com"),
-        new UserSDTO(4L, "Nikita Das", "nikita@example.com"),
-        new UserSDTO(101L, "Pankaj Kumar", "pankaj@example.com"),
-        new UserSDTO(102L, "Amit Kumar", "amit@example.com"),
-        new UserSDTO(103L, "Rohit Sharma", "rohit@example.com")
-    );
+    // List<UserSDTO> mockUsers = List.of(
+    //     new UserSDTO(1L, "Ajay Kumar", "ajay@example.com"),
+    //     new UserSDTO(2L, "Sonal Mehta", "sonal@example.com"),
+    //     new UserSDTO(3L, "Rahul Sharma", "rahul@example.com"),
+    //     new UserSDTO(4L, "Nikita Das", "nikita@example.com"),
+    //     new UserSDTO(101L, "Pankaj Kumar", "pankaj@example.com"),
+    //     new UserSDTO(102L, "Amit Kumar", "amit@example.com"),
+    //     new UserSDTO(103L, "Rohit Sharma", "rohit@example.com"),
+    //     new UserSDTO(110L, "Alice Johnson", "alice.johnson@example.com"),
+    //     new UserSDTO(112L, "Bob Smith", "bob.smith@example.com"),
+    //     new UserSDTO(113L, "Carol Williams", "carol.williams@example.com"),
+    //     new UserSDTO(114L, "David Lee", "david.lee@example.com"),
+    //     new UserSDTO(115L, "Eva Brown", "eva.brown@example.com")
+    // );
 
     // 🔹 Index users by ID for quick lookup
     Map<Long, String> userIdToNameMap = mockUsers.stream()
