@@ -3,15 +3,17 @@ package com.intranet.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.intranet.dto.ApproverDTO;
+import com.intranet.dto.ApproverUserListDTO;
+import com.intranet.dto.UserApproverIdListDTO;
 import com.intranet.dto.UserApproverMapDTO;
 import com.intranet.dto.UserApproverSummaryDTO;
+import com.intranet.dto.UserSDTO;
 import com.intranet.dto.UserSDTO;
 import com.intranet.entity.UserApproverMap;
 import com.intranet.repository.UserApproverMapRepo;
@@ -112,4 +114,60 @@ public List<UserApproverSummaryDTO> getUserApproverSummary() {
         return new UserApproverSummaryDTO(user.getId(), user.getName(), approverList);
     }).toList();
 }
+
+
+public UserApproverIdListDTO getApproverIdsByUserId(Long userId) {
+    List<UserApproverMap> mappings = repo.findByUserId(userId);
+
+    List<Long> approverIds = mappings.stream()
+        .map(UserApproverMap::getApproverId)
+        .collect(Collectors.toList());
+
+    return new UserApproverIdListDTO(userId, approverIds);
+}
+
+
+// public UserApproverIdListDTO getApproverListByUserId(Long userId) {
+//     // 🔹 Mock users
+//     List<UserSDTO> mockUsers = List.of(
+//         new UserSDTO(1L, "Ajay Kumar", "ajay@example.com"),
+//         new UserSDTO(2L, "Sonal Mehta", "sonal@example.com"),
+//         new UserSDTO(3L, "Rahul Sharma", "rahul@example.com"),
+//         new UserSDTO(4L, "Nikita Das", "nikita@example.com"),
+//         new UserSDTO(101L, "Pankaj Kumar", "pankaj@example.com"),
+//         new UserSDTO(102L, "Amit Kumar", "amit@example.com"),
+//         new UserSDTO(103L, "Rohit Sharma", "rohit@example.com")
+//     );
+
+//     // 🔹 Map userId to name
+//     Map<Long, String> userIdToName = mockUsers.stream()
+//         .collect(Collectors.toMap(UserSDTO::getId, UserDTO::getName));
+
+//     // 🔹 Fetch approvers for the user from DB
+//     List<UserApproverMap> mappings = repo.findByUserId(userId);
+
+//     // 🔹 Convert to approver DTOs
+//     List<ApproverDTO> approvers = mappings.stream()
+//         .map(m -> {
+//             Long approverId = m.getApproverId();
+//             String name = userIdToName.getOrDefault(approverId, "Unknown");
+//             return new ApproverDTO(approverId, name);
+//         })
+//         .collect(Collectors.toList());
+
+//     return new UserApproverIdListDTO(userId, approvers);
+// }
+
+public ApproverUserListDTO getUsersMappedToApprover(Long approverId) {
+    List<UserApproverMap> mappings = repo.findByApproverId(approverId);
+
+    List<Long> userIds = mappings.stream()
+        .map(UserApproverMap::getUserId)
+        .distinct()
+        .collect(Collectors.toList());
+
+    return new ApproverUserListDTO(approverId, userIds);
+}
+
+
 }

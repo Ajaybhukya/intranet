@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.intranet.dto.ApproverUserListDTO;
+import com.intranet.dto.UserApproverIdListDTO;
 import com.intranet.dto.UserApproverMapDTO;
 import com.intranet.dto.UserApproverSummaryDTO;
 import com.intranet.service.UserApproverMapService;
@@ -18,14 +20,17 @@ public class UserApproverMapController {
     private UserApproverMapService service;
 
     @GetMapping("/approver/{approverId}")
-    public List<UserApproverMapDTO> getByApprover(@PathVariable Long approverId) {
-        return service.getMappingsByApproverId(approverId);
+    public ApproverUserListDTO getUsersByApprover(@PathVariable Long approverId) {
+        return service.getUsersMappedToApprover(approverId);
     }
 
+
     @GetMapping("/user/{userId}")
-    public List<UserApproverMapDTO> getByUser(@PathVariable Long userId) {
-        return service.getMappingsByUserId(userId);
+    public UserApproverIdListDTO getApproverIds(@PathVariable Long userId) {
+    return service.getApproverIdsByUserId(userId);
     }
+
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/create")
