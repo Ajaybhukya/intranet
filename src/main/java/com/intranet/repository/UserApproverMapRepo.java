@@ -8,6 +8,7 @@ public interface UserApproverMapRepo extends JpaRepository<UserApproverMap, Long
 
     
     List<UserApproverMap> findByApproverId(Long approverId);
+    
     List<UserApproverMap> findByUserId(Long userId);
 
 

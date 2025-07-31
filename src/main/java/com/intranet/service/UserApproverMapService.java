@@ -1,12 +1,18 @@
 package com.intranet.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.intranet.dto.ApproverDTO;
 import com.intranet.dto.UserApproverMapDTO;
+import com.intranet.dto.UserApproverSummaryDTO;
+import com.intranet.dto.UserSDTO;
 import com.intranet.entity.UserApproverMap;
 import com.intranet.repository.UserApproverMapRepo;
 
@@ -16,6 +22,7 @@ public class UserApproverMapService {
 
     @Autowired
     private UserApproverMapRepo repo;
+
     public List<UserApproverMapDTO> getMappingsByApproverId(Long approverId) {
         List<UserApproverMap> mappings = repo.findByApproverId(approverId);
 
@@ -63,4 +70,46 @@ public class UserApproverMapService {
         repo.deleteAll(mappings);
         // Due to CascadeType.ALL + orphanRemoval=true on timeSheetApprovals, all related TimeSheetApproval records will be deleted too.
     }
+
+    
+    
+public List<UserApproverSummaryDTO> getUserApproverSummary() {
+    // 🔹 Mock users
+    List<UserSDTO> mockUsers = List.of(
+        new UserSDTO(1L, "Ajay Kumar", "ajay@example.com"),
+        new UserSDTO(2L, "Sonal Mehta", "sonal@example.com"),
+        new UserSDTO(3L, "Rahul Sharma", "rahul@example.com"),
+        new UserSDTO(4L, "Nikita Das", "nikita@example.com"),
+        new UserSDTO(101L, "Pankaj Kumar", "pankaj@example.com"),
+        new UserSDTO(102L, "Amit Kumar", "amit@example.com"),
+        new UserSDTO(103L, "Rohit Sharma", "rohit@example.com")
+    );
+
+    // 🔹 Index users by ID for quick lookup
+    Map<Long, String> userIdToNameMap = mockUsers.stream()
+        .collect(Collectors.toMap(UserSDTO::getId, UserSDTO::getName));
+
+    // 🔹 Fetch mappings from DB
+    List<UserApproverMap> allMappings = repo.findAll();
+
+    // 🔹 Group approverIds by userId
+    Map<Long, List<Long>> userToApproverIds = allMappings.stream()
+        .collect(Collectors.groupingBy(
+            UserApproverMap::getUserId,
+            Collectors.mapping(UserApproverMap::getApproverId, Collectors.toList())
+        ));
+
+    // 🔹 Build summary list
+    return mockUsers.stream().map(user -> {
+        List<Long> approverIds = userToApproverIds.get(user.getId());
+
+        List<ApproverDTO> approverList = (approverIds != null && !approverIds.isEmpty())
+            ? approverIds.stream()
+                .map(id -> new ApproverDTO(id, userIdToNameMap.getOrDefault(id, "Unknown")))
+                .toList()
+            : Collections.emptyList();
+
+        return new UserApproverSummaryDTO(user.getId(), user.getName(), approverList);
+    }).toList();
+}
 }

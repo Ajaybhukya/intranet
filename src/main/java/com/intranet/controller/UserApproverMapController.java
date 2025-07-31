@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.intranet.dto.UserApproverMapDTO;
+import com.intranet.dto.UserApproverSummaryDTO;
 import com.intranet.service.UserApproverMapService;
 
 @RestController
@@ -38,5 +39,10 @@ public class UserApproverMapController {
         service.deleteByUserId(userId);
         return ResponseEntity
                 .ok("Deleted all UserApproverMap records and related TimeSheetApprovals for userId: " + userId);
+    }
+
+    @GetMapping("/api/user-approver-summary")
+    public List<UserApproverSummaryDTO> getUserApproverSummary() {
+        return service.getUserApproverSummary();
     }
 }
