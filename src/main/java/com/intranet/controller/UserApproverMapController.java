@@ -66,4 +66,9 @@ public class UserApproverMapController {
                                  .body("Mapping not found.");
         }
     }
+    @GetMapping("/api/user-approver-summary-name/{userId}")
+    public UserApproverSummaryDTO getUserApproverSummaryByUserId(@PathVariable Long userId) {
+    return service.getUserApproverSummaryByUserId(userId);
+    }
+
 }

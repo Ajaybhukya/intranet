@@ -227,4 +227,39 @@ public ApproverUserListDTO getUsersMappedToApprover(Long approverId) {
 
         return true;
     }
+    
+    public UserApproverSummaryDTO getUserApproverSummaryByUserId(Long userId) {
+    // 🔹 Use mock users
+    List<UserSDTO> mockUsers = UserController.getAllMockUsers();  // Static call to controller method
+
+    // 🔹 Find the user from mock list
+    UserSDTO user = mockUsers.stream()
+        .filter(u -> u.getId().equals(userId))
+        .findFirst()
+        .orElse(null);
+
+    if (user == null) {
+        throw new IllegalArgumentException("User not found for ID: " + userId);
+    }
+
+    // 🔹 Map userId → userName
+    Map<Long, String> userIdToNameMap = mockUsers.stream()
+        .collect(Collectors.toMap(UserSDTO::getId, UserSDTO::getName));
+
+    // 🔹 Fetch mappings from DB
+    List<UserApproverMap> allMappings = repo.findByUserId(userId);
+
+    // 🔹 Extract approver IDs
+    List<Long> approverIds = allMappings.stream()
+        .map(UserApproverMap::getApproverId)
+        .collect(Collectors.toList());
+
+    // 🔹 Convert to DTOs with names using mock data
+    List<ApproverDTO> approverList = approverIds.stream()
+        .map(id -> new ApproverDTO(id, userIdToNameMap.getOrDefault(id, "Unknown")))
+        .collect(Collectors.toList());
+
+    return new UserApproverSummaryDTO(user.getId(), user.getName(), approverList);
+}
+
 }
