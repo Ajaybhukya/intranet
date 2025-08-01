@@ -124,6 +124,8 @@ Optional<TimeSheetApproval> findByTimesheetAndApprover(
 
 Optional<TimeSheetApproval> findFirstByTimesheet_Id(Long timesheetId);
 
+Optional<TimeSheetApproval> findLastByTimesheet_Id(Long timesheetId);
+
 boolean existsByTimesheet(TimeSheet timesheet);
 
 }

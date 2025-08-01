@@ -17,6 +17,11 @@ public class TimeSheetResponseDTO {
     private Long timesheetId;
     private LocalDate workDate;
     private LocalDateTime createdAt;
-    private String approvalStatus; // <-- Added this field
+    private String approvalStatus; // FINAL status
     private List<TimeSheetEntryResponseDTO> entries;
+
+    private List<Long> approvedBy;
+    private List<Long> rejectedBy;
+    private List<Long> pendingBy;
 }
+
