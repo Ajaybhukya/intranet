@@ -1,9 +1,9 @@
-name: Deploy Spring Boot App to EC2
+name: Deploy Spring Boot App to Local VM
 
 on:
   push:
     branches:
-      - maahishmati
+      - maahishmati  # or your desired branch
 
 jobs:
   deploy:
@@ -25,26 +25,25 @@ jobs:
     - name: Build with Maven
       run: ./mvnw clean package -DskipTests
 
-    - name: Upload and overwrite JAR on EC2  # upload/overwrite only TimesheetManagement.jar to EC2 app/
+    - name: Upload JAR to VM via password auth
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: 3.7.242.65
-        username: ubuntu
-        key: ${{ secrets.EC2_KEY }}
+        host: 192.168.4.220
+        username: admin
+        password: paves@2025
+        port: 22
         source: "target/TimesheetManagement.jar"
-        target: "/home/ubuntu/app/"
-        overwrite: true
+        target: "/home/admin/timesheet-app/"
         strip_components: 1
-
 
     - name: Restart Spring Boot service
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: 3.7.242.65
-        username: ubuntu
-        key: ${{ secrets.EC2_KEY }}
+        host: 192.168.4.220
+        username: admin
+        password: paves@2025
+        port: 22
         script: |
           sudo systemctl daemon-reload
           sudo systemctl restart TimesheetManagement
           sudo systemctl status TimesheetManagement --no-pager
-
