@@ -3,7 +3,7 @@ name: Deploy Spring Boot App to Local VM
 on:
   push:
     branches:
-      - main  # or your desired branch
+      - maahishmati  # or your desired branch
 
 jobs:
   deploy:
