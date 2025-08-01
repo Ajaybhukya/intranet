@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.intranet.dto.ManagerDetailedDTO;
 import com.intranet.dto.PendingApprovalDTO;
+import com.intranet.entity.TimeSheet;
 import com.intranet.entity.TimeSheetApproval;
 
 public interface TimeSheetApprovalRepo extends JpaRepository<TimeSheetApproval, Long> {
@@ -122,5 +123,7 @@ Optional<TimeSheetApproval> findByTimesheetAndApprover(
 
 
 Optional<TimeSheetApproval> findFirstByTimesheet_Id(Long timesheetId);
+
+boolean existsByTimesheet(TimeSheet timesheet);
 
 }

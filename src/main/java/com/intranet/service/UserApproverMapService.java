@@ -3,6 +3,7 @@ package com.intranet.service;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,14 @@ import com.intranet.dto.UserApproverMapDTO;
 import com.intranet.dto.UserApproverSummaryDTO;
 import com.intranet.dto.UserSDTO;
 import com.intranet.dto.UserSDTO;
+import com.intranet.entity.TimeSheet;
+import com.intranet.entity.TimeSheetApproval;
 import com.intranet.entity.UserApproverMap;
+import com.intranet.repository.TimeSheetApprovalRepo;
+import com.intranet.repository.TimeSheetRepo;
 import com.intranet.repository.UserApproverMapRepo;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserApproverMapService {
@@ -25,6 +32,12 @@ public class UserApproverMapService {
 
     @Autowired
     private UserApproverMapRepo repo;
+
+    @Autowired
+    private TimeSheetApprovalRepo timeSheetApprovalRepo;
+
+    @Autowired
+    private TimeSheetRepo timeSheetRepo;
 
     public List<UserApproverMapDTO> getMappingsByApproverId(Long approverId) {
         List<UserApproverMap> mappings = repo.findByApproverId(approverId);
@@ -177,5 +190,41 @@ public ApproverUserListDTO getUsersMappedToApprover(Long approverId) {
     return new ApproverUserListDTO(approverId, userIds);
 }
 
+// @Transactional
+// public boolean deleteMapping(Long approverId, Long deleteId) {
+//         Optional<UserApproverMap> mapping = repo.findByUserIdAndApproverId(deleteId, approverId);
+//         if (mapping.isPresent()) {
+//             repo.deleteByUserIdAndApproverId(deleteId, approverId);
+//             return true;
+//         }
+//         return false;
+//     }
 
+    @Transactional
+    public boolean deleteMapping(Long approverId, Long userId) {
+        Optional<UserApproverMap> optional = repo.findByUserIdAndApproverId(userId, approverId);
+        
+        if (optional.isEmpty()) return false;
+
+        UserApproverMap map = optional.get();
+
+        // Step 1: Collect all timesheets referenced in approvals
+        List<TimeSheet> relatedTimesheets = map.getApprovals().stream()
+            .map(TimeSheetApproval::getTimesheet)
+            .distinct()
+            .toList();
+
+        // Step 2: Delete the UserApproverMap (will cascade and delete approvals)
+        repo.delete(map);
+
+        // Step 3: For each timesheet, check if it's orphaned, and delete it
+        for (TimeSheet timesheet : relatedTimesheets) {
+            boolean stillHasApprovals = timeSheetApprovalRepo.existsByTimesheet(timesheet);
+            if (!stillHasApprovals) {
+                timeSheetRepo.delete(timesheet); // entries are auto-deleted via cascade
+            }
+        }
+
+        return true;
+    }
 }

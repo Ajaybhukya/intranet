@@ -2,6 +2,7 @@ package com.intranet.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -49,5 +50,20 @@ public class UserApproverMapController {
     @GetMapping("/api/user-approver-summary")
     public List<UserApproverSummaryDTO> getUserApproverSummary() {
         return service.getUserApproverSummary();
+    }
+
+    @DeleteMapping("/delete/{approverId}/{deleteId}")
+    public ResponseEntity<String> deleteUserApproverMapping(
+            @PathVariable Long approverId,
+            @PathVariable Long deleteId) {
+        
+        boolean deleted = service.deleteMapping(approverId, deleteId);
+        
+        if (deleted) {
+            return ResponseEntity.ok("Mapping deleted successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                 .body("Mapping not found.");
+        }
     }
 }
